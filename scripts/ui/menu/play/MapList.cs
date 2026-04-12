@@ -62,6 +62,16 @@ public partial class MapList : Panel, ISkinnable
     public string AuthorQuery = "";
 
     /// <summary>
+    /// Whether the list is currently showing the online archive instead of local maps.
+    /// </summary>
+    public bool OnlineMode = false;
+
+    /// <summary>
+    /// Online maps currently shown (only populated during online mode).
+    /// </summary>
+    public List<OnlineMap> CurrentOnlineMaps = [];
+
+    /// <summary>
     /// Queried and ordered maps to display in the list
     /// </summary>
     public List<Map> Maps = [];
@@ -117,16 +127,26 @@ public partial class MapList : Panel, ISkinnable
         MapParser.Instance.MapsImportFinished += maps =>
         {
             MapCache.Load(false);
-            UpdateMaps();
-            Select(maps[0]);
+            if (!OnlineMode)
+            {
+                UpdateMaps();
+                Select(maps[0]);
+            }
+            else
+            {
+                // If a map was just imported while in online mode, refresh online list
+                UpdateOnlineMaps(
+                    OnlineMapManager.GetUninstalledMaps(SearchQuery, AuthorQuery)
+                );
+            }
         };
         MapManager.MapsInitialized += _ => UpdateMaps();
         MapManager.MapUpdated += map =>
         {
-            UpdateMaps();
+            if (!OnlineMode) UpdateMaps();
         };
 
-        MapManager.MapDeleted += _ => UpdateMaps();
+        MapManager.MapDeleted += _ => { if (!OnlineMode) UpdateMaps(); };
 
         Task.Run(() => UpdateMaps());
 
@@ -383,11 +403,22 @@ public partial class MapList : Panel, ISkinnable
         SearchQuery = query ?? SearchQuery;
         AuthorQuery = author ?? AuthorQuery;
 
-        UpdateMaps();
+        if (OnlineMode)
+        {
+            UpdateOnlineMaps(
+                OnlineMapManager.GetUninstalledMaps(SearchQuery, AuthorQuery)
+            );
+        }
+        else
+        {
+            UpdateMaps();
+        }
     }
 
     public void UpdateMaps()
     {
+        if (OnlineMode) return; // In online mode, use UpdateOnlineMaps() instead
+
         Maps.Clear();
 
         List<Map> queried = [.. MapManager.Maps.Where(x => x.PrettyTitle.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase) && x.PrettyMappers.Contains(AuthorQuery, StringComparison.CurrentCultureIgnoreCase))];
@@ -401,6 +432,68 @@ public partial class MapList : Panel, ISkinnable
         foreach (Map map in unfavorited)
         {
             Maps.Add(map);
+        }
+
+        clear();
+    }
+
+    /// <summary>
+    /// Switches the list between local and online mode.
+    /// Pass <c>null</c> for <paramref name="onlineMaps"/> when switching back to offline.
+    /// </summary>
+    public void SetOnlineMode(bool online, List<OnlineMap> onlineMaps)
+    {
+        OnlineMode = online;
+
+        if (online)
+        {
+            UpdateOnlineMaps(onlineMaps ?? []);
+        }
+        else
+        {
+            CurrentOnlineMaps.Clear();
+            // Restore local map list
+            Maps.Clear();
+            List<Map> queried = [.. MapManager.Maps.Where(x =>
+                x.PrettyTitle.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase) &&
+                x.PrettyMappers.Contains(AuthorQuery, StringComparison.CurrentCultureIgnoreCase))];
+            List<Map> unfavorited = [];
+            foreach (Map map in queried)
+                (map.Favorite ? Maps : unfavorited).Add(map);
+            foreach (Map map in unfavorited)
+                Maps.Add(map);
+            clear();
+        }
+    }
+
+    /// <summary>
+    /// Refreshes the map list display from a set of online maps.
+    /// Creates ephemeral <see cref="Map"/> stubs so existing button infrastructure can be reused.
+    /// </summary>
+    public void UpdateOnlineMaps(List<OnlineMap> onlineMaps)
+    {
+        CurrentOnlineMaps = onlineMaps ?? [];
+        Maps.Clear();
+
+        foreach (OnlineMap om in CurrentOnlineMaps)
+        {
+            // Build a lightweight ephemeral Map stub from the online entry
+            Map stub = new(
+                filePath: "",
+                data: [],
+                id: om.Id,
+                artist: "",
+                title: om.Name,
+                rating: 0,
+                mappers: om.Authors,
+                difficulty: Math.Clamp(om.Difficulty, 0, Constants.DIFFICULTY_COLORS.Length - 1),
+                difficultyName: om.DifficultyName,
+                length: om.LengthMs,
+                audioBuffer: null,
+                coverBuffer: null,
+                ephemeral: true
+            );
+            Maps.Add(stub);
         }
 
         clear();
@@ -459,10 +552,23 @@ public partial class MapList : Panel, ISkinnable
         {
             if (dragDistance < 500)
             {
-                Select(button.Map);
-
-                button.Select();
-                button.UpdateOutline(1.0f);
+                if (OnlineMode)
+                {
+                    // Find the matching OnlineMap stub and trigger download
+                    OnlineMap target = CurrentOnlineMaps.Find(om => om.Id == button.Map.Name);
+                    if (target != null && !OnlineMapManager.IsDownloading)
+                    {
+                        button.Select();
+                        button.UpdateOutline(1.0f);
+                        OnlineMapManager.Instance.DownloadMap(target);
+                    }
+                }
+                else
+                {
+                    Select(button.Map);
+                    button.Select();
+                    button.UpdateOutline(1.0f);
+                }
             }
         };
 

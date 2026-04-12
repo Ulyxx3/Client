@@ -43,6 +43,7 @@ Lobby="*res://scripts/multiplayer/Lobby.cs"
 SoundManager="*res://scripts/SoundManager.cs"
 ToastNotification="*res://scripts/ui/ToastNotification.cs"
 MapParser="*res://scripts/map/MapParser.cs"
+OnlineMapManager="*res://scripts/map/OnlineMapManager.cs"
 
 [debug]
 

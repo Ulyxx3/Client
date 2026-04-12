@@ -37,6 +37,7 @@
 [ext_resource type="Texture2D" uid="uid://b44v7e2jfwmkn" path="res://user/skins/default/ui/buttons/random.png" id="27_tgcit"]
 [ext_resource type="Script" uid="uid://d36x1ln46itd1" path="res://scripts/ui/menu/play/RandomPickButton.cs" id="27_u43bj"]
 [ext_resource type="Script" uid="uid://nob6vs2h1mwj" path="res://scripts/ui/menu/ImportButton.cs" id="28_eku7s"]
+[ext_resource type="Script" path="res://scripts/ui/menu/play/OnlineToggleButton.cs" id="50_online"]
 [ext_resource type="Shader" uid="uid://rngh60dyh10b" path="res://scripts/shaders/outline.gdshader" id="30_q13xq"]
 [ext_resource type="Texture2D" uid="uid://bfy3x7rqnts4i" path="res://user/skins/default/ui/buttons/filter.png" id="31_5053t"]
 [ext_resource type="Texture2D" uid="uid://bl6ten82nkjmd" path="res://user/skins/default/ui/buttons/sort.png" id="32_2wgix"]
@@ -764,6 +765,16 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Random"
 icon = ExtResource("27_tgcit")
 script = ExtResource("27_u43bj")
+
+[node name="Online" type="Button" parent="Menus/Play/SubTopBar/HBoxContainer" unique_id=1089194664]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme = ExtResource("6_engjn")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Online"
+script = ExtResource("50_online")
 
 [node name="Separator" type="Control" parent="Menus/Play/SubTopBar/HBoxContainer" unique_id=736961026]
 custom_minimum_size = Vector2(20, 36)
