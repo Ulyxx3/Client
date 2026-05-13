@@ -156,16 +156,15 @@ public partial class MapList : Panel, ISkinnable
                 }
             }
 
-<<<<<<< HEAD
-        MapManager.MapDeleted += _ => { if (!OnlineMode) UpdateMaps(); };
-=======
-            Callable.From(() =>
+            if (!OnlineMode)
             {
-                clear();
-                UpdateMaps();
-            }).CallDeferred();
+                Callable.From(() =>
+                {
+                    clear();
+                    UpdateMaps();
+                }).CallDeferred();
+            }
         };
->>>>>>> upstream/indev
 
         Task.Run(() => UpdateMaps());
 
@@ -585,7 +584,6 @@ public partial class MapList : Panel, ISkinnable
         {
             if (dragDistance < 500)
             {
-<<<<<<< HEAD
                 if (OnlineMode)
                 {
                     // Find the matching OnlineMap stub and trigger download
@@ -599,21 +597,16 @@ public partial class MapList : Panel, ISkinnable
                 }
                 else
                 {
-                    Select(button.Map);
+                    bool selectionChanged = Select(button.Map);
+
+                    if (selectionChanged)
+                    {
+                        SoundManager.StartMapSelectionPlayback(button.Map);
+                    }
+
                     button.Select();
                     button.UpdateOutline(1.0f);
                 }
-=======
-                bool selectionChanged = Select(button.Map);
-
-                if (selectionChanged)
-                {
-                    SoundManager.StartMapSelectionPlayback(button.Map);
-                }
-
-                button.Select();
-                button.UpdateOutline(1.0f);
->>>>>>> upstream/indev
             }
         };
 

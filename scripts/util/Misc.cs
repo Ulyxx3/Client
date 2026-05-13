@@ -14,20 +14,20 @@ public class Misc
         switch (mod)
         {
             case "NoFail":
-                    tex = SkinManager.Instance.Skin.ModNoFailImage;
-                    break;
-                case "Ghost":
-                    tex = SkinManager.Instance.Skin.ModGhostImage;
-                    break;
-                case "HardRock":
-                    tex = SkinManager.Instance.Skin.ModHardRockImage;
-                    break;
-                default:
-                    tex = new();
-                    break;
-            }
+                tex = SkinManager.Instance.Skin.ModNoFailImage;
+                break;
+            case "Ghost":
+                tex = SkinManager.Instance.Skin.ModGhostImage;
+                break;
+            case "HardRock":
+                tex = SkinManager.Instance.Skin.ModHardRockImage;
+                break;
+            default:
+                tex = new();
+                break;
+        }
 
-            return tex;
+        return tex;
     }
 
     public static void CopyProperties(Node node, Node reference)
@@ -43,31 +43,31 @@ public class Misc
 
             node.Set(key, reference.Get(key));
         }
+    }
 
-        public static string GetRank(double accuracy)
-        {
-            if (accuracy >= 100) return "SS";
-            if (accuracy >= 98) return "S";
-            if (accuracy >= 95) return "A";
-            if (accuracy >= 90) return "B";
-            if (accuracy >= 85) return "C";
-            if (accuracy >= 80) return "D";
-            return "F";
-        }
+    public static string GetRank(double accuracy)
+    {
+        if (accuracy >= 100) return "SS";
+        if (accuracy >= 98) return "S";
+        if (accuracy >= 95) return "A";
+        if (accuracy >= 90) return "B";
+        if (accuracy >= 85) return "C";
+        if (accuracy >= 80) return "D";
+        return "F";
+    }
 
-        public static Color GetRankColor(string rank)
+    public static Color GetRankColor(string rank)
+    {
+        return rank switch
         {
-            return rank switch
-            {
-                "SS" => Color.Color8(255, 105, 180), // Hot Pink
-                "S" => Color.Color8(255, 215, 0),    // Gold
-                "A" => Color.Color8(50, 205, 50),    // Lime Green
-                "B" => Color.Color8(30, 144, 255),   // Dodger Blue
-                "C" => Color.Color8(255, 255, 0),    // Yellow
-                "D" => Color.Color8(255, 165, 0),    // Orange
-                _ => Color.Color8(255, 69, 0),       // Red-Orange (F)
-            };
-        }
+            "SS" => Color.Color8(255, 105, 180), // Hot Pink
+            "S" => Color.Color8(255, 215, 0),    // Gold
+            "A" => Color.Color8(50, 205, 50),    // Lime Green
+            "B" => Color.Color8(30, 144, 255),   // Dodger Blue
+            "C" => Color.Color8(255, 255, 0),    // Yellow
+            "D" => Color.Color8(255, 165, 0),    // Orange
+            _ => Color.Color8(255, 69, 0),       // Red-Orange (F)
+        };
     }
 
     public static void CopyReference(Node node, Node reference)
