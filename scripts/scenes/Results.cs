@@ -24,6 +24,9 @@ public partial class Results : BaseScene
         holder = GetNode<Panel>("Holder");
         cover = GetNode<TextureRect>("Cover");
 
+        // stops menu music after going to results scene
+        SoundManager.MenuMusic?.Stop();
+
         Input.MouseMode = settings.UseCursorInMenus ? Input.MouseModeEnum.Hidden : Input.MouseModeEnum.Visible;
         MenuCursor.Instance.Visible = settings.UseCursorInMenus;
 
@@ -68,7 +71,7 @@ public partial class Results : BaseScene
             }
         }
 
-        if (LegacyRunner.CurrentAttempt.Map.AudioBuffer != null)
+        if (SettingsManager.Instance.Settings.AutoplayJukebox.Value && LegacyRunner.CurrentAttempt.Map.AudioBuffer != null)
         {
             if (!SoundManager.Song.Playing)
             {
@@ -124,7 +127,7 @@ public partial class Results : BaseScene
 
     public override void _Input(InputEvent @event)
     {
-        if (@event is InputEventKey eventKey && eventKey.Pressed)
+        if (@event is InputEventKey eventKey && eventKey.Pressed && !eventKey.Echo)
         {
             switch (eventKey.PhysicalKeycode)
             {
@@ -164,7 +167,7 @@ public partial class Results : BaseScene
 
     public void UpdateVolume()
     {
-        SoundManager.Song.VolumeDb = SoundManager.ComputeVolumeDb(settings.VolumeMusic.Value, settings.VolumeMaster.Value, 70);
+        SoundManager.Song.VolumeDb = (float)SoundManager.ComputeVolumeDb((float)settings.VolumeMusic.Value, (float)settings.VolumeMaster.Value, 70);
     }
 
     public void Replay()
@@ -178,6 +181,11 @@ public partial class Results : BaseScene
 
     public void Stop()
     {
+        if (!SettingsManager.Instance.Settings.AutoplayJukebox.Value)
+        {
+            SoundManager.StopScopedSession();
+        }
+
         SoundManager.Song.PitchScale = (float)Lobby.Speed;
         SoundManager.UpdateVolume();
         SceneManager.Load("res://scenes/main_menu.tscn");

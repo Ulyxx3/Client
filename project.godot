@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Rhythia"
-config/version="0.1.1"
+config/version="0.1.2"
 run/main_scene="uid://cyrs54b4ot1p8"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Rhythia"
@@ -53,8 +53,6 @@ file_logging/enable_file_logging=true
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/size/resizable=false
-window/subwindows/embed_subwindows=false
 
 [dotnet]
 
@@ -70,9 +68,17 @@ folder_colors={
 "res://user/": "pink"
 }
 
+[gui]
+
+timers/tooltip_delay_sec=0.1
+
 [input_devices]
 
 pointing/android/enable_long_press_as_right_click=true
+
+[internationalization]
+
+rendering/root_node_layout_direction=1
 
 [physics]
 

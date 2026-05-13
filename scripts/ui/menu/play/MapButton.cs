@@ -80,7 +80,7 @@ public partial class MapButton : Control, ISkinnable
     {
         OutlineFill = (float)Mathf.Lerp(OutlineFill, targetOutlineFill, Math.Min(1, 10 * delta));
 
-        float now = (float)Time.GetTicksMsec();
+        float now = Time.GetTicksMsec();
 
         Favorited.RotationDegrees = ListIndex * -10 + now / 20;
         Favorited.Modulate = Color.Color8(255, 255, 255, (byte)(225 + 30 * Math.Sin(Math.PI * now / 2000 + ListIndex)));
@@ -143,7 +143,10 @@ public partial class MapButton : Control, ISkinnable
     {
         skin ??= SkinManager.Instance.Skin;
 
-        Favorited.Texture = skin.FavoriteImage;
+        if (IsInstanceValid(Favorited) && Favorited.IsInsideTree())
+        {
+            Favorited.Texture = skin.FavoriteImage;
+        }
     }
 
     private float computeSizeOffset()

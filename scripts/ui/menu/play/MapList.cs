@@ -145,8 +145,27 @@ public partial class MapList : Panel, ISkinnable
         {
             if (!OnlineMode) UpdateMaps();
         };
+        MapManager.MapDeleted += map =>
+        {
+            if (selectedMapID == map.Name)
+            {
+                selectedMapID = null;
+                if (MapManager.Maps.Count > 0)
+                {
+                    Callable.From(() => Select(MapManager.Maps[0], false)).CallDeferred();
+                }
+            }
 
+<<<<<<< HEAD
         MapManager.MapDeleted += _ => { if (!OnlineMode) UpdateMaps(); };
+=======
+            Callable.From(() =>
+            {
+                clear();
+                UpdateMaps();
+            }).CallDeferred();
+        };
+>>>>>>> upstream/indev
 
         Task.Run(() => UpdateMaps());
 
@@ -366,8 +385,25 @@ public partial class MapList : Panel, ISkinnable
         }
     }
 
-    public void Select(Map map, bool playIfPreSelected = true)
+    public bool Select(Map map, bool playIfPreSelected = true)
     {
+        if (map == null)
+        {
+            return false;
+        }
+
+        if (selectedMapID == map.Name)
+        {
+            if (playIfPreSelected)
+            {
+                LegacyRunner.Play(map, Lobby.Speed, Lobby.StartFrom, Lobby.Modifiers);
+            }
+
+            Focus(map);
+            SceneManager.Space?.UpdateMap(map);
+            return false;
+        }
+
         if (selectedMapID != null && selectedMapID != map.Name && mapButtons.TryGetValue(selectedMapID, out MapButton value))
         {
             value.Deselect();
@@ -376,16 +412,13 @@ public partial class MapList : Panel, ISkinnable
 
         MapManager.Select(map);
 
-        if (selectedMapID == map.Name && playIfPreSelected)
-        {
-            LegacyRunner.Play(Lobby.Map, Lobby.Speed, Lobby.StartFrom, Lobby.Modifiers);
-        }
 
         selectedMapID = map.Name;
 
         Focus(map);
 
         SceneManager.Space?.UpdateMap(map);
+        return true;
     }
 
     public void Focus(Map map)
@@ -552,6 +585,7 @@ public partial class MapList : Panel, ISkinnable
         {
             if (dragDistance < 500)
             {
+<<<<<<< HEAD
                 if (OnlineMode)
                 {
                     // Find the matching OnlineMap stub and trigger download
@@ -569,6 +603,17 @@ public partial class MapList : Panel, ISkinnable
                     button.Select();
                     button.UpdateOutline(1.0f);
                 }
+=======
+                bool selectionChanged = Select(button.Map);
+
+                if (selectionChanged)
+                {
+                    SoundManager.StartMapSelectionPlayback(button.Map);
+                }
+
+                button.Select();
+                button.UpdateOutline(1.0f);
+>>>>>>> upstream/indev
             }
         };
 

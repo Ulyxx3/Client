@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" uid="uid://8s0npsnw42ce" path="res://scripts/scenes/LegacyRunner.cs" id="1_1hgss"]
-[ext_resource type="ArrayMesh" uid="uid://ceww5w8t33lqy" path="res://user/meshes/squircle.obj" id="2_e1j6l"]
 [ext_resource type="Texture2D" uid="uid://b3g4aw54n6bow" path="res://user/skins/default/game/grid.png" id="2_q78ea"]
 [ext_resource type="Script" uid="uid://okqdw5gj567n" path="res://scripts/game/LegacyRenderer.cs" id="3_ew8wr"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://user/skins/default/game/cursor.png" id="3_negii"]
@@ -11,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://4x2vfpyjkri6" path="res://user/skins/default/game/health.png" id="7_wjg6i"]
 [ext_resource type="Texture2D" uid="uid://dmc5f6ajp8xv1" path="res://user/skins/default/game/progress_background.png" id="8_eu3ux"]
 [ext_resource type="Shader" uid="uid://dsysoy6w8ndnk" path="res://scripts/shaders/video_background.gdshader" id="8_ocxsu"]
+[ext_resource type="ArrayMesh" uid="uid://uqxu6tq6xhhg" path="res://user/meshes/squircle.obj" id="9_e1j6l"]
 [ext_resource type="Texture2D" uid="uid://d3s17ehomjscd" path="res://user/skins/default/game/progress.png" id="9_nde5v"]
 [ext_resource type="FontFile" uid="uid://cmjos3o0k2f6t" path="res://fonts/Comfortaa-Medium.ttf" id="11_o37lt"]
 [ext_resource type="Texture2D" uid="uid://80bitp5weqrb" path="res://user/skins/default/game/panel_left_background.png" id="11_sdncv"]
@@ -23,6 +23,65 @@
 [ext_resource type="Texture2D" uid="uid://lfj8i1bi6kfs" path="res://textures/ui/pause.png" id="23_7silw"]
 [ext_resource type="FontFile" uid="uid://dotb3skhwouha" path="res://fonts/Roboto-Bold.ttf" id="23_wf21h"]
 [ext_resource type="FontFile" uid="uid://rs2mb33nd3b1" path="res://fonts/Roboto-Italic.ttf" id="24_j6p10"]
+[ext_resource type="Script" uid="uid://qjqjxykl30bm" path="res://scripts/scenes/PauseHud.cs" id="25_pausehud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sijr0"]
+bg_color = Color(0.1072, 0.0896, 0.16, 0.25098)
+
+[sub_resource type="LabelSettings" id="LabelSettings_a70tm"]
+font_color = Color(1, 1, 1, 0.25098)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d5aou"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_43mxh"]
+bg_color = Color(0.0235294, 0.0196078, 0.0352941, 0.768627)
+
+[sub_resource type="LabelSettings" id="LabelSettings_pwlqp"]
+font = ExtResource("23_wf21h")
+font_size = 36
+
+[sub_resource type="LabelSettings" id="LabelSettings_tjduq"]
+font = ExtResource("24_j6p10")
+font_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kncke"]
+bg_color = Color(0.0352941, 0.0313726, 0.0509804, 0.501961)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6kbgk"]
+bg_color = Color(0.0352941, 0.0313726, 0.0509804, 0.501961)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jlnvv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y08lf"]
+bg_color = Color(0.0745098, 0.0666667, 0.101961, 0.501961)
+
+[sub_resource type="Theme" id="Theme_e1j6l"]
+Button/fonts/font = ExtResource("5_pxgh4")
+Button/styles/focus = SubResource("StyleBoxFlat_kncke")
+Button/styles/hover = SubResource("StyleBoxFlat_6kbgk")
+Button/styles/normal = SubResource("StyleBoxEmpty_jlnvv")
+Button/styles/pressed = SubResource("StyleBoxFlat_y08lf")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_pausehud"]
+viewport_path = NodePath("PauseHud/PauseVP")
+
+[sub_resource type="LabelSettings" id="LabelSettings_pause_base"]
+font = ExtResource("23_wf21h")
+font_size = 84
+font_color = Color(0.5, 0.5, 0.5, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_pause_fill"]
+font = ExtResource("23_wf21h")
+font_size = 84
+
+[sub_resource type="LabelSettings" id="LabelSettings_pause_hint"]
+font = ExtResource("12_axsek")
+font_size = 24
+
+[sub_resource type="LabelSettings" id="LabelSettings_r7xjp"]
+font = ExtResource("12_axsek")
+font_size = 18
+font_color = Color(1, 1, 1, 0.8)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sijr0"]
 bg_color = Color(0.1072, 0.0896, 0.16, 0.25098)
@@ -63,8 +122,8 @@ Button/styles/pressed = SubResource("StyleBoxFlat_y08lf")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73q55"]
 transparency = 1
-cull_mode = 2
 shading_mode = 0
+specular_mode = 2
 disable_fog = true
 vertex_color_use_as_albedo = true
 vertex_color_is_srgb = true
@@ -72,7 +131,7 @@ vertex_color_is_srgb = true
 [sub_resource type="MultiMesh" id="MultiMesh_almyi"]
 transform_format = 1
 use_colors = true
-mesh = ExtResource("2_e1j6l")
+mesh = ExtResource("9_e1j6l")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a6jk1"]
 resource_name = "Material"
@@ -197,6 +256,14 @@ bg_color = Color(0, 0, 0, 0)
 font = ExtResource("12_axsek")
 font_size = 50
 
+[sub_resource type="LabelSettings" id="LabelSettings_pause_counter_title"]
+font = ExtResource("12_axsek")
+font_size = 20
+
+[sub_resource type="LabelSettings" id="LabelSettings_pause_counter_value"]
+font = ExtResource("12_axsek")
+font_size = 42
+
 [sub_resource type="ViewportTexture" id="ViewportTexture_suyxu"]
 viewport_path = NodePath("PanelRight/PanelRightViewport")
 
@@ -226,11 +293,6 @@ font_color = Color(1, 1, 1, 0.768627)
 [sub_resource type="LabelSettings" id="LabelSettings_s1j5a"]
 font = ExtResource("12_axsek")
 font_size = 50
-
-[sub_resource type="LabelSettings" id="LabelSettings_r7xjp"]
-font = ExtResource("12_axsek")
-font_size = 18
-font_color = Color(1, 1, 1, 0.8)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gc8yu"]
 shader = ExtResource("14_3xchs")
@@ -453,28 +515,28 @@ theme = SubResource("Theme_e1j6l")
 theme_override_font_sizes/font_size = 28
 text = "GIVE UP"
 
-[node name="PauseOverlay" type="Panel" parent="."]
-visible = false
-modulate = Color(1, 1, 1, 0)
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_d5aou")
+[node name="PauseHud" type="Sprite3D" parent="." unique_id=1594331476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -6)
+pixel_size = 0.012
+no_depth_test = true
+render_priority = 104
+texture = SubResource("ViewportTexture_pausehud")
 
-[node name="Background" type="ColorRect" parent="PauseOverlay"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0.4)
+[node name="PauseVP" type="SubViewport" parent="PauseHud" unique_id=1841571202]
+disable_3d = true
+transparent_bg = true
+canvas_item_default_texture_filter = 2
+size = Vector2i(600, 600)
+render_target_update_mode = 4
 
-[node name="Label" type="Label" parent="PauseOverlay"]
+[node name="Control" type="Control" parent="PauseHud/PauseVP" unique_id=1700063552]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 600.0
+offset_bottom = 600.0
+script = ExtResource("25_pausehud")
+
+[node name="Paused" type="Label" parent="PauseHud/PauseVP/Control" unique_id=1511102743]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -482,17 +544,30 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -60.0
+offset_top = -300.0
 offset_right = 300.0
-offset_bottom = 60.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "PAUSED"
-label_settings = SubResource("LabelSettings_pwlqp")
+label_settings = SubResource("LabelSettings_pause_base")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SubLabel" type="Label" parent="PauseOverlay"]
+[node name="ProgressMask" type="Control" parent="PauseHud/PauseVP/Control" unique_id=1572831027]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = -300.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="FillPaused" type="Label" parent="PauseHud/PauseVP/Control/ProgressMask" unique_id=2138730588]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -500,17 +575,34 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = 20.0
+offset_top = -300.0
 offset_right = 300.0
-offset_bottom = 60.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Press Space to Resume"
-label_settings = SubResource("LabelSettings_tjduq")
+text = "PAUSED"
+label_settings = SubResource("LabelSettings_pause_fill")
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="QuitOverlay" type="Panel" parent="."]
+[node name="HoldR" type="Label" parent="PauseHud/PauseVP/Control" unique_id=1786763793]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = 40.0
+offset_right = 300.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "HOLD R TO EXIT"
+label_settings = SubResource("LabelSettings_pause_hint")
+horizontal_alignment = 1
+
+[node name="QuitOverlay" type="Panel" parent="." unique_id=316579954]
 visible = false
 modulate = Color(1, 1, 1, 0)
 z_index = 2
@@ -522,7 +614,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_d5aou")
 
-[node name="Holder" type="VBoxContainer" parent="QuitOverlay"]
+[node name="Holder" type="VBoxContainer" parent="QuitOverlay" unique_id=289008022]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -537,22 +629,21 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="QuitOverlay/Holder"]
+[node name="Label" type="Label" parent="QuitOverlay/Holder" unique_id=1425722822]
 layout_mode = 2
 text = "Hold R to Quit"
 label_settings = SubResource("LabelSettings_r7xjp")
 horizontal_alignment = 1
 
-[node name="ProgressBackground" type="ColorRect" parent="QuitOverlay/Holder"]
+[node name="ProgressBackground" type="ColorRect" parent="QuitOverlay/Holder" unique_id=372914467]
 custom_minimum_size = Vector2(300, 8)
 layout_mode = 2
-color = Color(0.15, 0.15, 0.15, 0.6)
+color = Color(0.28, 0.28, 0.28, 0.75)
 
-[node name="ProgressBar" type="ColorRect" parent="QuitOverlay/Holder/ProgressBackground"]
+[node name="ProgressBar" type="ColorRect" parent="QuitOverlay/Holder/ProgressBackground" unique_id=541280931]
 layout_mode = 0
-offset_right = 0.0
 offset_bottom = 8.0
-color = Color(1, 0.3, 0.3, 0.9)
+color = Color(0.54, 0.54, 0.54, 0.82)
 
 [node name="Transition" type="ColorRect" parent="." unique_id=784178581]
 self_modulate = Color(1, 1, 1, 0)
@@ -730,6 +821,38 @@ grow_vertical = 2
 theme = ExtResource("4_rvp5o")
 text = "1x"
 label_settings = SubResource("LabelSettings_usmyc")
+horizontal_alignment = 1
+
+[node name="PauseTitle" type="Label" parent="PanelLeft/PanelLeftViewport" unique_id=531787894 groups=["pause_text"]]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.86
+anchor_right = 0.5
+anchor_bottom = 0.86
+offset_left = -90.0
+offset_top = -18.0
+offset_right = 90.0
+offset_bottom = 18.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "PAUSES"
+label_settings = SubResource("LabelSettings_pause_counter_title")
+horizontal_alignment = 1
+
+[node name="PauseCount" type="Label" parent="PanelLeft/PanelLeftViewport" unique_id=1695472366 groups=["pause_text"]]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.93
+anchor_right = 0.5
+anchor_bottom = 0.93
+offset_left = -90.0
+offset_top = -26.0
+offset_right = 90.0
+offset_bottom = 26.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "0"
+label_settings = SubResource("LabelSettings_pause_counter_value")
 horizontal_alignment = 1
 
 [node name="PanelRight" type="MeshInstance3D" parent="." unique_id=1993445313]

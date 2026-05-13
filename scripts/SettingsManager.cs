@@ -14,17 +14,14 @@ public partial class SettingsManager : Node
 
 	public static bool HideNotifications = false;
 
-	public static ColorRect Menu;
+    public static SettingsMenu Menu;
 
 	public static SettingsManager Instance { get; private set; }
 
 	public SettingsProfile Settings = new SettingsProfile();
 
-	[Signal]
-	public delegate void MenuToggledEventHandler(bool shown);
-
-	[Signal]
-	public delegate void SavedEventHandler();
+    [Signal]
+    public delegate void SavedEventHandler();
 
 	[Signal]
 	public delegate void LoadedEventHandler();
@@ -33,22 +30,8 @@ public partial class SettingsManager : Node
 	{
 		Instance = this;
 
-		Menu = SceneManager.Instance.GetNode<ColorRect>("Settings");
-
-		HideMenu();
-	}
-
-	public static void ShowMenu(bool show = true)
-	{
-		Shown = show;
-
-		Instance.EmitSignal(SignalName.MenuToggled, Shown);
-	}
-
-	public static void HideMenu()
-	{
-		ShowMenu(false);
-	}
+        Menu = SceneManager.Instance.GetNode<SettingsMenu>("Settings");
+    }
 
 	public static void Save(string profile = null)
 	{

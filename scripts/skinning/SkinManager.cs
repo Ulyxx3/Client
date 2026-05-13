@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 using Godot;
 using Tomlyn;
-using Tomlyn.Model;
 
 [GlobalClass]
 public partial class SkinManager : Node
@@ -49,7 +46,7 @@ public partial class SkinManager : Node
 
         string configFile = $"{Constants.USER_FOLDER}/skins/{settings.Skin.Value}/config.toml";
 
-        if (File.Exists(configFile) && Toml.TryToModel<SkinConfig>(File.ReadAllText(configFile), out SkinConfig config, out _))
+        if (File.Exists(configFile) && Toml.TryToModel(File.ReadAllText(configFile), out SkinConfig config, out _))
         {
             skin.Config = config;
         }
@@ -131,26 +128,26 @@ public partial class SkinManager : Node
         // Sounds
 
         skin.HitSoundBuffer = loadSound("hit.mp3");
+        skin.MissSoundBuffer = loadSound("miss.mp3");
         skin.FailSoundBuffer = loadSound("fail.mp3");
+        skin.MenuMusicBuffer = loadSound("menu.mp3");
 
         // Meshes
 
-        skin.NoteMesh = loadMesh($"{Constants.USER_FOLDER}/meshes/{(settings.NoteMesh.Value == "skin" ? skin.Config.NoteMesh : settings.NoteMesh.Value)}.obj");
+        skin.NoteMesh = loadMesh($"{Constants.USER_FOLDER}/meshes/{(settings.NoteMesh == "skin" ? skin.Config.NoteMesh : settings.NoteMesh)}.obj");
 
         // Colors
 
-        string colorsetPath = $"{Constants.USER_FOLDER}/colorsets/{(settings.NoteColors.Value == "skin" ? skin.Config.NoteColors : settings.NoteColors.Value)}.txt";
+        string colorsetPath = $"{Constants.USER_FOLDER}/colorsets/{(settings.NoteColors == "skin" ? skin.Config.NoteColors : settings.NoteColors)}.txt";
 
         if (File.Exists(colorsetPath))
         {
-            string[] split = File.ReadAllText(colorsetPath).Split(",");
+            string[] split = File.ReadAllText(colorsetPath).StripEdges().ReplaceLineEndings(",").Split(",");
             Color[] colors = new Color[split.Length];
 
             for (int i = 0; i < split.Length; i++)
             {
-                split[i] = split[i].TrimPrefix("#").Substr(0, 6);
-                split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
-                colors[i] = Color.FromHtml(split[i]);
+                colors[i] = Util.Misc.ParseColor(split[i], Colors.White);
             }
 
             skin.NoteColors = colors;
@@ -158,8 +155,8 @@ public partial class SkinManager : Node
 
         // Spaces
 
-        skin.GameSpace = loadSpace($"res://prefabs/spaces/{(settings.GameSpace.Value == "skin" ? skin.Config.GameSpace : settings.GameSpace.Value)}.tscn");
-        skin.MenuSpace = loadSpace($"res://prefabs/spaces/{(settings.MenuSpace.Value == "skin" ? skin.Config.MenuSpace : settings.MenuSpace.Value)}.tscn");
+        skin.GameSpace = loadSpace($"res://prefabs/spaces/{(settings.GameSpace == "skin" ? skin.Config.GameSpace : settings.GameSpace)}.tscn");
+        skin.MenuSpace = loadSpace($"res://prefabs/spaces/{(settings.MenuSpace == "skin" ? skin.Config.MenuSpace : settings.MenuSpace)}.tscn");
 
         /////
         if (!SettingsManager.HideNotifications)
@@ -175,29 +172,24 @@ public partial class SkinManager : Node
         Load();
     }
 
-    private static readonly string[] image_extensions = [".png", ".jpg", ".jpeg"];
-
     private static ImageTexture loadTexture(string skinPath)
     {
         var settings = SettingsManager.Instance.Settings;
-        string skinDir = $"{Constants.USER_FOLDER}/skins/{settings.Skin.Value}";
-        string fullPath = $"{skinDir}/{skinPath}";
+        string fullPath = $"{Constants.USER_FOLDER}/skins/{settings.Skin.Value}/{skinPath}";
 
         if (!File.Exists(fullPath))
         {
-            string basePath = fullPath.GetBaseName();
-            foreach (string ext in image_extensions)
+            string fallbackPath = $"{Constants.USER_FOLDER}/skins/default/{skinPath}";
+            if (!File.Exists(fallbackPath))
             {
-                string altPath = basePath + ext;
-                if (File.Exists(altPath))
-                {
-                    fullPath = altPath;
-                    break;
-                }
+                return null;
             }
+
+            fullPath = fallbackPath;
         }
 
-        return ImageTexture.CreateFromImage(Image.LoadFromFile(fullPath));
+        Image image = Image.LoadFromFile(fullPath);
+        return image != null ? ImageTexture.CreateFromImage(image) : null;
     }
 
     private static byte[] loadSound(string skinPath)
@@ -228,7 +220,7 @@ public partial class SkinManager : Node
     {
         bool exists = ResourceLoader.Exists(path) || Godot.FileAccess.FileExists(path);
 
-        return exists ? (ArrayMesh)Util.Misc.OBJParser.Call("load_obj", path) : GD.Load<ArrayMesh>($"res://user/meshes/squircle.obj");
+        return exists ? Util.Misc.OBJParser.Call("load_obj", path).As<ArrayMesh>() : GD.Load<ArrayMesh>("res://user/meshes/squircle.obj");
     }
 
     private static BaseSpace loadSpace(string path)

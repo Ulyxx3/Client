@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Runtime.InteropServices.Marshalling;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -40,7 +36,7 @@ public partial class MapParser : Node
             var maps = new ConcurrentBag<Map>();
 
             Callable.From(() => Instance.EmitSignal(SignalName.MapsImportStarted)).CallDeferred();
-            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = System.Environment.ProcessorCount / 4 }, file =>
+            Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = Math.Max(System.Environment.ProcessorCount / 4, 1) }, file =>
             {
                 try
                 {

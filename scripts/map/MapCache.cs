@@ -178,6 +178,7 @@ public static class MapCache
     {
         var existing = DatabaseService.Connection.Find<Map>(x => x.Hash == x.Hash);
         var updated = DatabaseService.Connection.Find<Map>(x => x.Name == map.Name);
+
         try
         {
             if (updated != null && existing != null)
@@ -252,7 +253,7 @@ public static class MapCache
                 if (map.Cover == Map.DefaultCover && File.Exists($"{path}/cover.png"))
                 {
                     byte[] coverBuffer = File.ReadAllBytes($"{path}/cover.png");
-                    if (coverBuffer?.Length <= 0)
+                    if (coverBuffer == null || coverBuffer.Length == 0)
                     {
                         continue;
                     }
@@ -263,7 +264,10 @@ public static class MapCache
                     {
                         Callable.From(() =>
                         {
-                            map.Cover = ImageTexture.CreateFromImage(image);
+                            if (MapManager.Maps.Contains(map))
+                            {
+                                map.Cover = ImageTexture.CreateFromImage(image);
+                            }
                         }).CallDeferred();
                     }
 
@@ -273,13 +277,18 @@ public static class MapCache
 
         if (maps.Count < 1)
         {
-            MapManager.Maps = new();
+            MapManager.Maps = [];
             return;
         }
 
         var sortedMaps = maps.Where(x => x.Favorite).OrderBy(x => x.PrettyTitle).ToList();
 
         sortedMaps.AddRange(maps.Where(x => !x.Favorite).OrderBy(x => x.PrettyTitle));
+
+        foreach (var map in sortedMaps)
+        {
+            MapManager.Sanitize(map);
+        }
 
         MapManager.Maps = sortedMaps;
     }

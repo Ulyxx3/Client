@@ -98,6 +98,10 @@ bg_color = Color(1, 1, 1, 1)
 font = ExtResource("5_hl5e0")
 font_size = 36
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k5xsf"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5gt56"]
 bg_color = Color(0, 0, 0, 0.0627451)
 
@@ -415,25 +419,26 @@ layout_mode = 2
 
 [node name="Header" type="Label" parent="Menus/Home/News/VBoxContainer" unique_id=1350479761]
 layout_mode = 2
-text = "0.1.1 (early-26feb22)"
+text = "0.1.2 (early-26apr30)"
 label_settings = SubResource("LabelSettings_0uejd")
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Menus/Home/News/VBoxContainer" unique_id=473981233]
-custom_minimum_size = Vector2(0, 400)
+custom_minimum_size = Vector2(0, 480)
 layout_mode = 2
 theme = ExtResource("6_engjn")
 theme_override_constants/line_separation = 2
 theme_override_constants/paragraph_separation = 6
 theme_override_fonts/normal_font = ExtResource("7_6h3lr")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_k5xsf")
 bbcode_enabled = true
 text = "[font_size=28][b]FEATURES[/b][font_size=18]
-+ Support for image files other than PNG & JPG[br]+ Reset to defaults setting[br]+ Display FPS setting[br]+ Parallax setting now applies to Spin mode[br]* Non-PHXM maps are now imported on startup (SSPM & TXT)
++ Galaxy space[br]+ Tunnel space[br]+ Cursor Rotation setting[br]+ Cursor Opacity setting[br]+ Space to Pause setting[br]+ Local Offset setting[br]+ More volume settings[br]+ Super Simple HUD setting[br]+ Hold R to exit map keybind[br]+ F1 to open wiki keybind[br]+ Ctrl + M to mute keybind[br]+ Miss sounds[br]+ Menu music (currently empty, replace menu.mp3 to your skin folder)[br]* Changed Fade Out setting to a slider & updated its behaviour to work more like Fade In[br]* Added support for nightly colorset format
 [font_size=28][b]FIXES[/b][font_size=18]
-* Gameplay performance improvements (~25-35% increase)[br]* Improved map importing (faster and more reliable)[br]* Waves space coloring is more consistent[br]* Pressing ESC to close settings is more reliable[br]* Absolute input made more accurate[br]* Map preview no longer inverted[br]* Spin no longer displays a placeholder mod icon in gameplay
+* Fixed comma decimal separator number formatting[br]* Fixed Start From slider with comma decimal separator[br]* Fixed map info covers resizing after import[br]* Fixed map list not updating on map deletion[br]* Safer cover & skin texture loading[br]* Safer note color parsing[br]* Fixed maps failing to import on systems with <4 threads[br]* Dynamic song resyncing during gameplay[br]* Fixed song progress bar incremental update delay[br]* Fixed double Esc to open game menu after opening settings[br]* Fixed flickering notes in replays[br]* Fixed clicking outside the update popup causing a softlock[br]* Fixed displayed selected profile inaccurate[br]* Fixed number range settings imprecision[br]* Fixed song search bar not focusing on key press after using slider
 [font_size=28][b]MISC[/b][font_size=18]
-* Set default window size to 1280x720"
+* Cap framerate at 30 when unfocused[br]* Allow windowed mode to be resized"
 shortcut_keys_enabled = false
 
 [node name="Panel" type="Panel" parent="Menus/Home/News/VBoxContainer/RichTextLabel" unique_id=1035549202]
@@ -1632,7 +1637,7 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_eku7s")
 
 [node name="TopBar" type="Panel" parent="." unique_id=560351556]
-anchors_preset = 10
+anchors_preset = -1
 anchor_right = 1.0
 offset_bottom = 72.0
 mouse_filter = 2
@@ -1673,7 +1678,7 @@ grow_vertical = 2
 theme_override_fonts/normal_font = ExtResource("19_c6nra")
 theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
-text = "Rhythia [font_size=12][color=ffffffa0]testbuild-3march2026"
+text = "Rhythia [font_size=12][color=ffffffa0]0.1.2 (early-26apr30)"
 shortcut_keys_enabled = false
 vertical_alignment = 1
 
@@ -1768,7 +1773,7 @@ Link = "https://discord.gg/kaFPWkfZeS"
 
 [node name="JukeboxPanel" type="Panel" parent="." unique_id=1253575]
 clip_contents = true
-anchors_preset = 12
+anchors_preset = -1
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0

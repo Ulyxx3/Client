@@ -1,0 +1,118 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "DiscordRichPresence": {
+        "type": "Direct",
+        "requested": "[1.6.1.70, )",
+        "resolved": "1.6.1.70",
+        "contentHash": "yho1fdhbsedICHdfHe/Tu3IX6a5oj4fiPFL0keZStlsh7T/FrdjcwZZ7C1uC2HUvcXbFh+VEJvcbo1W66QtkUg==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1"
+        }
+      },
+      "Godot.NET.Sdk": {
+        "type": "Direct",
+        "requested": "[4.5.0, )",
+        "resolved": "4.5.0",
+        "contentHash": "PYPVsaq5knx4qj2dbvdnnHE7qva9Of1ALM1Y3EuiBEV/9ZmNeApE/J/eobI7WNbc6OZ/SKRLiPgglw59QbSj9w=="
+      },
+      "Godot.SourceGenerators": {
+        "type": "Direct",
+        "requested": "[4.6.2, )",
+        "resolved": "4.6.2",
+        "contentHash": "CqSn9E38CqCvHARIpZXzYw/KkDKkrGjCYjRrKq3kTAIsDGOOZ/W9wiVnfbvmTpER7gbbrFKAd6WA201ELBynQw=="
+      },
+      "GodotSharp": {
+        "type": "Direct",
+        "requested": "[4.6.2, )",
+        "resolved": "4.6.2",
+        "contentHash": "yWYaxRtawrYOQ6TZqKovkw6IN3jNWLTjfrL+pvoGdprvGT7LOYdBCwy0OU7rSfzTn48Rr4IuyuZoSuC0Cp2JeA=="
+      },
+      "GodotSharpEditor": {
+        "type": "Direct",
+        "requested": "[4.6.2, )",
+        "resolved": "4.6.2",
+        "contentHash": "WbxolK7BIzSl7d8jhTQQSwZ7JEf+6RHeaZWa6aw7f/qXsN/hXzFSgQvpKxGrLo0icQlowjvF0NomnYO5owMG7w==",
+        "dependencies": {
+          "GodotSharp": "4.6.2"
+        }
+      },
+      "Semver": {
+        "type": "Direct",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "9jZCicsVgTebqkAujRWtC9J1A5EQVlu0TVKHcgoCuv345ve5DYf4D1MjhKEnQjdRZo6x/vdv6QQrYFs7ilGzLA==",
+        "dependencies": {
+          "Microsoft.Extensions.Primitives": "5.0.1"
+        }
+      },
+      "sqlite-net-pcl": {
+        "type": "Direct",
+        "requested": "[1.9.172, )",
+        "resolved": "1.9.172",
+        "contentHash": "go533+huyvg5bOMmCpX+DyvLrcVRiEBIpqEiDHgXRijWIBBNkWnyMr/w+5ZzrUArKY+4ApucsbBnFtP3QITrJg==",
+        "dependencies": {
+          "SQLitePCLRaw.bundle_green": "2.1.2"
+        }
+      },
+      "Tomlyn": {
+        "type": "Direct",
+        "requested": "[0.20.0, )",
+        "resolved": "0.20.0",
+        "contentHash": "Z8TmFcz6oeULVSVGDvbF1h+gnCoy/6NbWrlsQg9f2i+lzqXtUoU4+2RJIm8/s/14uSu0OqTv6JcSngTw3tlkTQ=="
+      },
+      "Updatum": {
+        "type": "Direct",
+        "requested": "[1.3.2, )",
+        "resolved": "1.3.2",
+        "contentHash": "P10SUrVLzZ0u2X9sYLsAzIDpK73HuXyu6saUWWgoWM+hL2gbHXId6/APwd1Lwz59q/sKPhaZzMRZqDtgcOxbow==",
+        "dependencies": {
+          "Octokit": "14.0.0"
+        }
+      },
+      "Microsoft.Extensions.Primitives": {
+        "type": "Transitive",
+        "resolved": "5.0.1",
+        "contentHash": "5WPSmL4YeP7eW+Vc8XZ4DwjYWBAiSwDV9Hm63JJWcz1Ie3Xjv4KuJXzgCstj48LkLfVCYa7mLcx7y+q6yqVvtw=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.1",
+        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
+      },
+      "Octokit": {
+        "type": "Transitive",
+        "resolved": "14.0.0",
+        "contentHash": "jGOuTH1l+TCpJH+fwYOp7USzHDuGfN1jKbLz3J2COwyn+wL08eynvpnM6rY2qkzIEXum3PN2p2QkP3BW/p9Qcw=="
+      },
+      "SQLitePCLRaw.bundle_green": {
+        "type": "Transitive",
+        "resolved": "2.1.2",
+        "contentHash": "e2FRX87YHoSer+tLFX9P/povHLK0uH7UcdimHRPnfTSam+NZChVVXjBxe1MYnyBGlwX5dSs5sTlDg/yZBM7iVw==",
+        "dependencies": {
+          "SQLitePCLRaw.lib.e_sqlite3": "2.1.2",
+          "SQLitePCLRaw.provider.e_sqlite3": "2.1.2"
+        }
+      },
+      "SQLitePCLRaw.core": {
+        "type": "Transitive",
+        "resolved": "2.1.2",
+        "contentHash": "A8EBepVqY2lnAp3a8jnhbgzF2tlj2S3HcJQGANTYg/TbYbKa8Z5cM1h74An/vy0svhfzT7tVY0sFmUglLgv+2g=="
+      },
+      "SQLitePCLRaw.lib.e_sqlite3": {
+        "type": "Transitive",
+        "resolved": "2.1.2",
+        "contentHash": "zibGtku8M4Eea1R3ZCAxc86QbNvyEN17mAcQkvWKBuHvRpMiK2g5anG4R5Be7cWKSd1i6baYz8y4dMMAKcXKPg=="
+      },
+      "SQLitePCLRaw.provider.e_sqlite3": {
+        "type": "Transitive",
+        "resolved": "2.1.2",
+        "contentHash": "lxCZarZdvAsMl2zw9bXHrXK6RxVhB4b23iTFhCOdHFhxfbsxLxWf+ocvswJwR/9Wh/E//ddMi+wJGqUKV7VwoA==",
+        "dependencies": {
+          "SQLitePCLRaw.core": "2.1.2"
+        }
+      }
+    }
+  }
+}

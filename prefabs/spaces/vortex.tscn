@@ -1,0 +1,69 @@
+[gd_scene format=3 uid="uid://fvnu534mc07s"]
+
+[ext_resource type="Script" uid="uid://clqe5h4ejvoia" path="res://scripts/spaces/Vortex.cs" id="1_8cv0c"]
+
+[sub_resource type="Environment" id="Environment_uposg"]
+resource_local_to_scene = true
+background_mode = 1
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0, 0, 0, 1)
+fog_density = 1.0
+fog_depth_curve = 0.5176324
+fog_depth_begin = 0.0
+fog_depth_end = 950.0
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_4ksj6"]
+load_path = "res://.godot/imported/squircle_blank.png-56066c369baf0fb23e738c301878c14b.s3tc.ctex"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5kvbl"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+albedo_texture = SubResource("CompressedTexture2D_4ksj6")
+
+[sub_resource type="QuadMesh" id="QuadMesh_rjy1p"]
+material = SubResource("StandardMaterial3D_5kvbl")
+
+[node name="Vortex" type="Node3D" unique_id=5537677]
+script = ExtResource("1_8cv0c")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=532696618]
+environment = SubResource("Environment_uposg")
+
+[node name="Squircles" type="Node3D" parent="." unique_id=1335913808]
+
+[node name="1" type="MeshInstance3D" parent="Squircles" unique_id=2028334315]
+transform = Transform3D(600, 0, 0, 0, 600, 0, 0, 0, 1, 0, 0, -180)
+transparency = 0.94
+mesh = SubResource("QuadMesh_rjy1p")
+skeleton = NodePath("../../..")
+
+[node name="2" type="MeshInstance3D" parent="Squircles" unique_id=1562200459]
+transform = Transform3D(492.40387, -86.82409, 0, 86.82409, 492.40387, 0, 0, 0, 1, 0, 0, -260)
+transparency = 0.95
+mesh = SubResource("QuadMesh_rjy1p")
+skeleton = NodePath("../..")
+
+[node name="3" type="MeshInstance3D" parent="Squircles" unique_id=1500077356]
+transform = Transform3D(375.877, -136.80804, 0, 136.80804, 375.877, 0, 0, 0, 1, 0, 0, -340)
+transparency = 0.96
+mesh = SubResource("QuadMesh_rjy1p")
+
+[node name="4" type="MeshInstance3D" parent="Squircles" unique_id=1458796133]
+transform = Transform3D(259.80762, -150, 0, 150, 259.80762, 0, 0, 0, 1, 0, 0, -420)
+transparency = 0.97
+mesh = SubResource("QuadMesh_rjy1p")
+skeleton = NodePath("../..")
+
+[node name="5" type="MeshInstance3D" parent="Squircles" unique_id=2096445391]
+transform = Transform3D(153.2089, -128.55751, 0, 128.55751, 153.2089, 0, 0, 0, 1, 0, 0, -500)
+transparency = 0.98
+mesh = SubResource("QuadMesh_rjy1p")
+skeleton = NodePath("../../..")
+
+[node name="6" type="MeshInstance3D" parent="Squircles" unique_id=706642390]
+transform = Transform3D(80.34846, -95.755554, 0, 95.755554, 80.34846, 0, 0, 0, 1, 0, 0, -580)
+transparency = 0.99
+mesh = SubResource("QuadMesh_rjy1p")
+skeleton = NodePath("../../..")

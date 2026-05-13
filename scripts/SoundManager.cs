@@ -6,76 +6,88 @@ using Godot;
 
 public partial class SoundManager : Node, ISkinnable
 {
-	public static SoundManager Instance;
+    public enum PlaybackScope
+    {
+        Silent,
+        Preview,
+        GameplayResults,
+    }
 
-	public static AudioStreamPlayer HitSound;
-	public static AudioStreamPlayer MissSound;
-	public static AudioStreamPlayer FailSound;
-	public static AudioStreamPlayer Song;
+    public static SoundManager Instance;
+
+    public static AudioStreamPlayer HitSound;
+    public static AudioStreamPlayer MissSound;
+    public static AudioStreamPlayer FailSound;
+    public static AudioStreamPlayer Song;
+    public static AudioStreamPlayer MenuMusic;
 
 	public Action<Map> JukeboxPlayed;
 
 	public event Action JukeboxEmpty;
 
-	public static int[] JukeboxQueue = [];
-	public static int JukeboxIndex = 0;
-	public static bool JukeboxPaused = false;
-	public static ulong LastRewind = 0;
-	public static Map Map;
+    public static int[] JukeboxQueue = [];
+    public static int JukeboxIndex = 0;
+    public static bool JukeboxPaused = false;
+    public static ulong LastRewind = 0;
+    public static Map Map;
+    public static PlaybackScope Scope = PlaybackScope.Silent;
 
-	private static bool volumePopupShown = false;
-	private static ulong lastVolumeChange = 0;
+    private static bool volumePopupShown = false;
+    private static ulong lastVolumeChange = 0;
+    private static bool? jeeping = null; // we're jeeping (last state of a song)
+    private static bool menuMusicPausedByUser = false;
 
 	public override void _Ready()
 	{
 		Instance = this;
 
-		HitSound = new();
-		MissSound = new();
-		FailSound = new();
-		Song = new();
+        HitSound = new() { Name = "Hit" };
+        MissSound = new() { Name = "Miss" };
+        FailSound = new() { Name = "Fail" };
+        Song = new() { Name = "Song" };
+        MenuMusic = new() { Name = "Menu" };
 
-		HitSound.MaxPolyphony = 16;
+        HitSound.MaxPolyphony = 16;
+        MissSound.MaxPolyphony = 16;
 
-		AddChild(HitSound);
-		AddChild(MissSound);
-		AddChild(FailSound);
-		AddChild(Song);
+        AddChild(HitSound);
+        AddChild(MissSound);
+        AddChild(FailSound);
+        AddChild(Song);
+        AddChild(MenuMusic);
 
 		SkinManager.Instance.Loaded += UpdateSkin;
 
 		UpdateSkin(SkinManager.Instance.Skin);
 
-		Song.Finished += () =>
-		{
-			switch (SceneManager.Scene.Name)
-			{
-				case "SceneMenu":
-					if (SettingsManager.Instance.Settings.AutoplayJukebox)
-					{
-						JukeboxIndex++;
-						PlayJukebox(JukeboxIndex);
-					}
-					break;
-				case "SceneResults":
-					PlayJukebox(JukeboxIndex);  // play skinnable results song here in the future
-					break;
-				default:
-					break;
-			}
-		};
+        Song.Finished += () =>
+        {
+            if (isScopedPlayback())
+            {
+                StopScopedSession();
+                return;
+            }
 
-		SettingsManager.Instance.Loaded += UpdateVolume;
-		Lobby.Instance.SpeedChanged += (speed) => { SoundManager.Song.PitchScale = (float)speed; };
-		MapManager.Selected.ValueChanged += (_, selected) =>
-		{
-			var map = selected.Value;
+            switch (SceneManager.Scene.Name)
+            {
+                case "SceneMenu":
+                    if (SettingsManager.Instance.Settings.AutoplayJukebox)
+                    {
+                        JukeboxIndex++;
+                        PlayJukebox(JukeboxIndex);
+                    }
+                    break;
+                case "SceneResults":
+                    PlayJukebox(JukeboxIndex);  // play skinnable results song here in the future
+                    break;
+                default:
+                    break;
+            }
+        };
 
-			if (Map == null || Map.Name != map.Name)
-			{
-				PlayJukebox(map);
-			}
-		};
+        SettingsManager.Instance.Loaded += UpdateVolume;
+        Lobby.Instance.SpeedChanged += (speed) => { SoundManager.Song.PitchScale = (float)speed; };
+        MapManager.Selected.ValueChanged += (_, _) => RefreshMenuMusicPlayback();
 
 		MapManager.MapDeleted += (map) =>
 		{
@@ -86,17 +98,23 @@ public partial class SoundManager : Node, ISkinnable
 				return;
 			}
 
-			if (JukeboxQueue.Length == 0)
-			{
-				Song.Stop();
-				Map = null;
-				JukeboxEmpty?.Invoke();
-			}
-			else
-			{
-				PlayJukebox(new Random().Next(0, JukeboxQueue.Length));
-			}
-		};
+            if (isScopedPlayback())
+            {
+                StopScopedSession();
+                return;
+            }
+
+            if (JukeboxQueue.Length == 0)
+            {
+                Song.Stop();
+                Map = null;
+                JukeboxEmpty?.Invoke();
+            }
+            else
+            {
+                PlayJukebox(new Random().Next(0, JukeboxQueue.Length));
+            }
+        };
 
 		UpdateVolume();
 
@@ -104,26 +122,37 @@ public partial class SoundManager : Node, ISkinnable
 		{
 			UpdateJukeboxQueue();
 
-			if (SettingsManager.Instance.Settings.AutoplayJukebox)
-			{
-				PlayJukebox(new Random().Next(0, JukeboxQueue.Length));
-			}
-		}
+            if (SettingsManager.Instance.Settings.AutoplayJukebox)
+            {
+                PlayJukebox(new Random().Next(0, JukeboxQueue.Length));
+            }
+            else
+            {
+                StopScopedSession();
+            }
+        }
 
-		if (MapManager.Initialized)
-		{
-			start();
-			return;
-		}
+        if (MapManager.Initialized)
+        {
+            start();
+            printSongPlaybackState();
+            return;
+        }
 
-		MapManager.MapsInitialized += _ => start();
-	}
+        MapManager.MapsInitialized += _ => start();
 
-	public override void _Process(double delta)
-	{
-		if (volumePopupShown && Time.GetTicksMsec() - lastVolumeChange >= 1000)
-		{
-			volumePopupShown = false;
+        RefreshMenuMusicPlayback();
+        printSongPlaybackState();
+    }
+
+    public override void _Process(double delta)
+    {
+        RefreshMenuMusicPlayback();
+        printSongPlaybackState();
+
+        if (volumePopupShown && Time.GetTicksMsec() - lastVolumeChange >= 1000)
+        {
+            volumePopupShown = false;
 
 			Tween tween = SceneManager.VolumePanel.CreateTween().SetTrans(Tween.TransitionType.Quad).SetParallel();
 			tween.TweenProperty(SceneManager.VolumePanel, "modulate", Color.FromHtml("ffffff00"), 0.25);
@@ -165,9 +194,23 @@ public partial class SoundManager : Node, ISkinnable
 		}
 	}
 
-	public static void PlayJukebox(Map map, bool setRichPresence = true)
-	{
-		Map = map;
+    public static void PlayJukebox(Map map, bool setRichPresence = true)
+    {
+        if (map == null)
+        {
+            return;
+        }
+
+        if (isScopedPlayback())
+        {
+            StartMapSelectionPlayback(map, setRichPresence);
+            return;
+        }
+
+        MenuMusic?.Stop();
+        menuMusicPausedByUser = false;
+
+        Map = map;
 
 		if (map.AudioBuffer == null)
 		{
@@ -212,29 +255,257 @@ public partial class SoundManager : Node, ISkinnable
 		PlayJukebox(map, setRichPresence);
 	}
 
-	public static float ComputeVolumeDb(float volume, float master, float range)
-	{
-		if (volume <= 0 || master <= 0) return float.NegativeInfinity;
-		return -80 + range * (float)Math.Pow(volume / 100, 0.1) * (float)Math.Pow(master / 100, 0.1);
-	}
+    public static void StartMapSelectionPlayback(Map map, bool setRichPresence = true)
+    {
+        if (map == null)
+        {
+            return;
+        }
+
+        Song.Stop();
+        Song.StreamPaused = false;
+        Song.PitchScale = (float)Lobby.Speed;
+        MenuMusic?.Stop();
+        menuMusicPausedByUser = false;
+
+        Map = map;
+        Scope = PlaybackScope.Preview;
+
+        if (MapManager.Maps != null)
+        {
+            int mapIndex = MapManager.Maps.FindIndex(x => x.Id == map.Id);
+            if (mapIndex >= 0)
+            {
+                JukeboxIndex = mapIndex;
+            }
+        }
+
+        Song.Stream = Util.Audio.LoadFromFile($"{MapUtil.MapsCacheFolder}/{map.Name}/audio.{map.AudioExt}");
+        Song.Play(0);
+
+        Instance.JukeboxPlayed?.Invoke(map);
+
+        if (setRichPresence)
+        {
+            Discord.Client.UpdateState($"Listening to {map.PrettyTitle}");
+        }
+    }
+
+    public static void BeginGameplayScope(Map map)
+    {
+        if (!isScopedPlayback())
+        {
+            return;
+        }
+
+        Map = map;
+        Scope = PlaybackScope.GameplayResults;
+        MenuMusic?.Stop();
+    }
+
+    public static void StopScopedSession()
+    {
+        Song.Stop();
+        Song.StreamPaused = false;
+        Map = null;
+        Scope = PlaybackScope.Silent;
+        Instance.JukeboxEmpty?.Invoke();
+
+        RefreshMenuMusicPlayback();
+    }
+
+    public static bool IsJukeboxPaused()
+    {
+        if (Song != null && Song.StreamPaused)
+        {
+            return true;
+        }
+
+        return menuMusicPausedByUser;
+    }
+
+    public static bool ToggleJukeboxPause()
+    {
+        if (Song != null && (Song.Playing || Song.StreamPaused))
+        {
+            Song.StreamPaused = !Song.StreamPaused;
+            JukeboxPanel.Instance.UpdateMap(Map);
+            return Song.StreamPaused;
+        }
+
+        if (MenuMusic == null || MenuMusic.Stream == null)
+        {
+            return false;
+        }
+
+        if (!shouldPlayMenuMusic() && !menuMusicPausedByUser)
+        {
+            return false;
+        }
+
+        menuMusicPausedByUser = !menuMusicPausedByUser;
+
+        if (menuMusicPausedByUser)
+        {
+            MenuMusic.StreamPaused = true;
+        }
+        else
+        {
+            if (MenuMusic.StreamPaused)
+            {
+                MenuMusic.StreamPaused = false;
+            }
+            else if (!MenuMusic.Playing)
+            {
+                MenuMusic.Play();
+            }
+        }
+
+        return menuMusicPausedByUser;
+    }
+
+    private static bool isScopedPlayback()
+    {
+        return !SettingsManager.Instance.Settings.AutoplayJukebox.Value;
+    }
+
+    public static float ComputeVolumeDb(float volume, float master, float range)
+    {
+        if (volume <= 0 || master <= 0) return float.NegativeInfinity;
+        return (float)(-80 + range * Math.Pow(volume / 100, 0.1) * Math.Pow(master / 100, 0.1));
+    }
 
 	public static void UpdateVolume()
 	{
 		var settings = SettingsManager.Instance.Settings;
 
-		Song.VolumeDb = ComputeVolumeDb(settings.VolumeMusic.Value, settings.VolumeMaster.Value, 70);
-		HitSound.VolumeDb = ComputeVolumeDb(settings.VolumeSFX.Value, settings.VolumeMaster.Value, 80);
-		FailSound.VolumeDb = ComputeVolumeDb(settings.VolumeSFX.Value, settings.VolumeMaster.Value, 80);
-	}
+        Song.VolumeDb = ComputeVolumeDb((float)settings.VolumeMusic.Value, (float)settings.VolumeMaster.Value, 70);
+        MenuMusic.VolumeDb = ComputeVolumeDb((float)settings.VolumeMenuMusic.Value, (float)settings.VolumeMaster.Value, 70);
+        HitSound.VolumeDb = ComputeVolumeDb((float)settings.VolumeHitSound.Value, (float)settings.VolumeMaster.Value, 80);
+        MissSound.VolumeDb = ComputeVolumeDb((float)settings.VolumeMissSound.Value, (float)settings.VolumeMaster.Value, 80);
+        FailSound.VolumeDb = ComputeVolumeDb((float)settings.VolumeSFX.Value, (float)settings.VolumeMaster.Value, 80);
+    }
+
+    public static void PlayHitSound()
+    {
+        if (!isSoundEffectEnabled(SettingsManager.Instance?.Settings.EnableHitSound, HitSound))
+        {
+            return;
+        }
+
+        HitSound.Play();
+    }
+
+    public static void PlayMissSound()
+    {
+        if (!isSoundEffectEnabled(SettingsManager.Instance?.Settings.EnableMissSound, MissSound))
+        {
+            return;
+        }
+
+        MissSound.Play();
+    }
 
 	public static void UpdateJukeboxQueue()
 	{
 		JukeboxQueue = [.. MapManager.Maps.Select(x => x.Id)];
 	}
 
-	public void UpdateSkin(SkinProfile skin)
-	{
-		HitSound.Stream = Util.Audio.LoadStream(skin.HitSoundBuffer);
-		FailSound.Stream = Util.Audio.LoadStream(skin.FailSoundBuffer);
-	}
+    public void UpdateSkin(SkinProfile skin)
+    {
+        HitSound.Stream = Util.Audio.LoadStream(skin.HitSoundBuffer);
+        MissSound.Stream = Util.Audio.LoadStream(skin.MissSoundBuffer);
+        FailSound.Stream = Util.Audio.LoadStream(skin.FailSoundBuffer);
+        MenuMusic.Stream = Util.Audio.LoadStream(skin.MenuMusicBuffer);
+
+        RefreshMenuMusicPlayback();
+    }
+
+    public static void RefreshMenuMusicPlayback()
+    {
+        if (MenuMusic == null)
+        {
+            return;
+        }
+
+        JukeboxPanel.Instance?.UpdateMap(Map);
+
+        if (menuMusicPausedByUser)
+        {
+            if (MenuMusic.Playing && !MenuMusic.StreamPaused)
+            {
+                MenuMusic.StreamPaused = true;
+            }
+
+            JukeboxPanel.Instance?.ShowMenuTheme();
+
+            return;
+        }
+
+        if (shouldPlayMenuMusic())
+        {
+            if (MenuMusic.StreamPaused)
+            {
+                MenuMusic.StreamPaused = false;
+            }
+            else if (!MenuMusic.Playing)
+            {
+                MenuMusic.Play();
+            }
+
+            JukeboxPanel.Instance?.ShowMenuTheme();
+        }
+        else if (MenuMusic.Playing || MenuMusic.StreamPaused)
+        {
+            MenuMusic.Stop();
+            MenuMusic.StreamPaused = false;
+
+            if (Map == null)
+            {
+                JukeboxPanel.Instance?.ClearMap();
+            }
+        }
+    }
+
+    private static bool shouldPlayMenuMusic()
+    {
+        if (!SettingsManager.Instance.Settings.EnableMenuMusic.Value)
+        {
+            return false;
+        }
+
+        if (MenuMusic.Stream == null)
+        {
+            return false;
+        }
+
+        if (SceneManager.Scene is not MainMenu)
+        {
+            return false;
+        }
+
+        if (Song != null && Song.Playing)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool isSoundEffectEnabled(SettingsItem<bool> setting, AudioStreamPlayer player)
+    {
+        return setting != null && setting.Value && player?.Stream != null;
+    }
+
+    private static void printSongPlaybackState()
+    {
+        bool isSongPlaying = Song != null && Song.Playing;
+
+        if (jeeping == isSongPlaying) // vroom vroom jeep
+        {
+            return;
+        }
+
+        jeeping = isSongPlaying; //jeeps go beep beep
+    }
 }
